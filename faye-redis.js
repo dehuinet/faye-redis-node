@@ -62,7 +62,7 @@ Engine.prototype = {
   createClient: function(callback, context,message) {
     var clientId = this._server.generateId(), self = this;
     if(message&&typeof(message.clientType)!="undefined"){
-       clientId+=message.clientType; 
+       clientId=message.clientType+clientId; 
     }
     this._redis.zadd(this._ns + '/clients', 0, clientId, function(error, added) {
       if (added === 0) return self.createClient(callback, context);
