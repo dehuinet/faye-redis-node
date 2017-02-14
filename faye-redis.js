@@ -59,8 +59,11 @@ Engine.prototype = {
     clearInterval(this._gc);
   },
 
-  createClient: function(callback, context) {
+  createClient: function(callback, context,message) {
     var clientId = this._server.generateId(), self = this;
+    if(message&&typeof(message.clientType)!="undefined"){
+       clientId+=message.clientType; 
+    }
     this._redis.zadd(this._ns + '/clients', 0, clientId, function(error, added) {
       if (added === 0) return self.createClient(callback, context);
       self._server.debug('Created new client ?', clientId);
