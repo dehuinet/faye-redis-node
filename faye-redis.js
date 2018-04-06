@@ -54,10 +54,7 @@
       function createGCTask(uniFileId) {
           var expiryTime = gc * 1.5;
           var gcSchedule = function() {
-              //给外部应用设置一个集群模式下单列调用
-              if(self._options.singleProcess){
-                self._options.singleProcess();
-              }
+            
               self._gc = setInterval(function() {
                   self._redis.expire(self._ns + '/locks/singleton', expiryTime);
                   self.gc();
@@ -65,9 +62,17 @@
           }
           self._redis.set(self._ns + '/locks/singleton', uniFileId, 'NX', 'EX', expiryTime, function(error, set) {
               if (set) {
+                  //给外部应用设置一个集群模式下单列调用
+                  if(self._options.singleProcess){
+                    self._options.singleProcess(uniFileId,uniFileId);
+                  }
                   gcSchedule();
               } else {
                   self._redis.get(self._ns + '/locks/singleton', function(error, oldUniFileId) {
+                       //给外部应用设置一个集群模式下单列调用
+                      if(self._options.singleProcess){
+                        self._options.singleProcess(uniFileId,oldUniFileId);
+                      }
                       if (oldUniFileId == uniFileId) {
                           gcSchedule();
                       }
