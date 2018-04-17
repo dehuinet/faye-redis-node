@@ -52,11 +52,12 @@
       }
 
       function createGCTask(uniFileId) {
-          var expiryTime = gc * 1.5;
+          var expiryTime = gc * 2;
           var gcSchedule = function() {
             
               self._gc = setInterval(function() {
-                  self._redis.expire(self._ns + '/locks/singleton', expiryTime);
+                  self._redis.setex(self._ns + '/locks/singleton', expiryTime, uniFileId);
+                  // self._redis.expire(self._ns + '/locks/singleton', expiryTime);
                   self.gc();
               }, gc * 1000);
           }
