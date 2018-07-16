@@ -2,9 +2,7 @@
       this._server = server;
       this._options = options || {};
 
-      var redis = require('redis'),
-          host = this._options.host || this.DEFAULT_HOST,
-          port = this._options.port || this.DEFAULT_PORT,
+      var redis = require('ioredis'),
           db = this._options.database || this.DEFAULT_DATABASE,
           auth = this._options.password,
           gc = this._options.gc || this.DEFAULT_GC,
@@ -16,8 +14,8 @@
           this._redis = redis.createClient(socket, { no_ready_check: true });
           this._subscriber = redis.createClient(socket, { no_ready_check: true });
       } else {
-          this._redis = redis.createClient(port, host, { no_ready_check: true });
-          this._subscriber = redis.createClient(port, host, { no_ready_check: true });
+          this._redis = createRedis.call(this, this._options);
+          this._subscriber = createRedis.call(this, this._options);
       }
 
       if (auth) {
@@ -38,6 +36,28 @@
           if (topic === self._closeChannel) self._server.trigger('close', message);
       });
 
+      function isSentinels(config) {
+            return config.hasOwnProperty('sentinels');
+      }
+
+      function createRedis(config) {
+            if (isSentinels(config)) {
+                /** 哨兵模式 */
+                var sentinelsConfig = config.sentinels;
+                return new IORedis({
+                    sentinels: sentinelsConfig.remote,
+                    name: sentinelsConfig.name
+                })
+            } else {
+                var port = config.port || this.DEFAULT_PORT,
+                    host = config.host || this.DEFAULT_HOST
+                return new IORedis(
+                    port,
+                    host,
+                    { no_ready_check: true, socket_keepalive: true }
+                )
+            }
+      }
 
       function generateUUID() {
           var d = new Date().getTime();
