@@ -1,7 +1,12 @@
   var Engine = function(server, options) {
       this._server = server;
       this._options = options || {};
-
+        this.logger = options.logger;
+        ['info', 'error'].forEach(function(key) {
+            if (!this.logger.hasOwnProperty(key)) {
+                this.logger[key] = function() {};
+            }
+        })
       var redis = require('ioredis'),
           db = this._options.database || this.DEFAULT_DATABASE,
           auth = this._options.password,
@@ -61,7 +66,7 @@
                 // )
             }
             if (config.password) {
-                option.password = password;
+                option.password = config.password;
             }
             return new redis(option)
       }
@@ -275,6 +280,8 @@
               self = this;
 
           multi.lrange(key, 0, -1, function(error, jsonMessages) {
+              self.logger.info('faye-redis  empty queue jsonMessages =>', jsonMessages);
+              self.logger.info('faye-redis  empty queue jsonMessages type =>', typeof jsonMessages);
               if (!jsonMessages) return;
               var messages = jsonMessages.map(function(json) {
                   return JSON.parse(json)
