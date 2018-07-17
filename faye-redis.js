@@ -44,14 +44,14 @@
             if (isSentinels(config)) {
                 /** 哨兵模式 */
                 var sentinelsConfig = config.sentinels;
-                return new IORedis({
+                return new redis({
                     sentinels: sentinelsConfig.remote,
                     name: sentinelsConfig.name
                 })
             } else {
                 var port = config.port || this.DEFAULT_PORT,
                     host = config.host || this.DEFAULT_HOST
-                return new IORedis(
+                return new redis(
                     port,
                     host,
                     { no_ready_check: true, socket_keepalive: true }
