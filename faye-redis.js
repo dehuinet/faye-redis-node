@@ -2,9 +2,10 @@
       this._server = server;
       this._options = options || {};
         this.logger = options.logger;
+        var that = this;
         ['info', 'error'].forEach(function(key) {
-            if (!this.logger.hasOwnProperty(key)) {
-                this.logger[key] = function() {};
+            if (!that.logger.hasOwnProperty(key)) {
+                that.logger[key] = function() {};
             }
         })
       var redis = require('ioredis'),
