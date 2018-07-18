@@ -2,11 +2,11 @@
       this._server = server;
       this._options = options || {};
         this.logger = options.logger;
-        var that = this;
         if (!this.logger) {
-            this.logger = {};
+            var self = this;
+            self.logger = {};
             ['info', 'error'].forEach(function(key) {
-                that.logger[key] = function() {};
+                self.logger[key] = function() {};
             })
         }
         
@@ -281,18 +281,20 @@
           var key = this._ns + '/clients/' + clientId + '/messages',
               multi = this._redis.multi(),
               self = this;
-
-          multi.lrange(key, 0, -1, function(error, jsonMessages) {
-              self.logger.info('faye-redis  empty queue jsonMessages =>', jsonMessages);
-              self.logger.info('faye-redis  empty queue jsonMessages type =>', typeof jsonMessages);
-              if (!jsonMessages || Object.prototype.toString.call(jsonMessages) !== '[object Array]') return;
-              var messages = jsonMessages.map(function(json) {
-                  return JSON.parse(json)
-              });
-              self._server.deliver(clientId, messages);
-          });
+        
+          multi.lrange(key, 0, -1);
+          var LRANGE_RESULT_IDX = 0;
           multi.del(key);
-          multi.exec();
+          multi.exec(function(result) {
+            var messages = result[LRANGE_RESULT_IDX][1];
+            if (!messages || Object.prototype.toString.call(messages) !== '[object Array]' || messages.length === 0) {
+                return;
+            }
+            messages = messages.map(function(json) {
+                return JSON.parse(json);
+            })
+            self._server.deliver(clientId, messages);
+          });
       },
 
       gc: function() {
