@@ -9,7 +9,7 @@
                 that.logger[key] = function() {};
             })
         }
-      var redis = require('redis'),
+      var redis = require('ioredis'),
           host = this._options.host || this.DEFAULT_HOST,
           port = this._options.port || this.DEFAULT_PORT,
           db = this._options.database || this.DEFAULT_DATABASE,
