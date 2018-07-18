@@ -3,11 +3,12 @@
       this._options = options || {};
         this.logger = options.logger;
         var that = this;
-        ['info', 'error'].forEach(function(key) {
-            if (!that.logger.hasOwnProperty(key)) {
+        if (!this.logger) {
+            ['info', 'error'].forEach(function(key) {
                 that.logger[key] = function() {};
-            }
-        })
+            })
+        }
+        
       var redis = require('ioredis'),
           db = this._options.database || this.DEFAULT_DATABASE,
           auth = this._options.password,
@@ -283,7 +284,7 @@
           multi.lrange(key, 0, -1, function(error, jsonMessages) {
               self.logger.info('faye-redis  empty queue jsonMessages =>', jsonMessages);
               self.logger.info('faye-redis  empty queue jsonMessages type =>', typeof jsonMessages);
-              if (!jsonMessages) return;
+              if (!jsonMessages || Object.prototype.toString.call(jsonMessages) !== '[object Array]') return;
               var messages = jsonMessages.map(function(json) {
                   return JSON.parse(json)
               });
