@@ -2,6 +2,13 @@
       this._server = server;
       this._options = options || {};
         this.logger = options.logger;
+        var that = this;
+        if (!this.logger) {
+            this.logger = {};
+            ['info', 'error'].forEach(function(key) {
+                that.logger[key] = function() {};
+            })
+        }
       var redis = require('redis'),
           host = this._options.host || this.DEFAULT_HOST,
           port = this._options.port || this.DEFAULT_PORT,
