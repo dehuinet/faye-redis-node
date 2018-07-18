@@ -4,6 +4,7 @@
         this.logger = options.logger;
         var that = this;
         if (!this.logger) {
+            this.logger = {};
             ['info', 'error'].forEach(function(key) {
                 that.logger[key] = function() {};
             })
