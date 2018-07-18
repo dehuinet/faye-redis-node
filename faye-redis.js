@@ -1,7 +1,7 @@
   var Engine = function(server, options) {
       this._server = server;
       this._options = options || {};
-
+        this.logger = options.logger;
       var redis = require('redis'),
           host = this._options.host || this.DEFAULT_HOST,
           port = this._options.port || this.DEFAULT_PORT,
@@ -249,6 +249,7 @@
 
           multi.lrange(key, 0, -1, function(error, jsonMessages) {
               if (!jsonMessages) return;
+              self.logger.info('empty queue jsonMessages =>', jsonMessages);
               var messages = jsonMessages.map(function(json) {
                   return JSON.parse(json)
               });
