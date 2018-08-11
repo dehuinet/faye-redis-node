@@ -49,29 +49,52 @@
       }
 
       function createRedis(config) {
-          var option = {db: config.database};
+        return new redis.Cluster([{
+            "host": "192.168.100.94",
+            "port": "6375",
+          }, {
+            "host": "192.168.100.94",
+            "port": "7001",
+          }, {
+            "host": "192.168.100.95",
+            "port": "6376",
+          }, {
+            "host": "192.168.100.95",
+            "port": "7002",
+          }, {
+            "host": "192.168.100.96",
+            "port": "6377",
+          }, {
+            "host": "192.168.100.96",
+            "port": "7003",
+          }], {
+            redisOptions: {
+              db: 0
+            }
+          })
+        //   var option = {db: config.database};
 
 
-            if (isSentinels(config)) {
-                /** 哨兵模式 */
-                var sentinelsConfig = config.sentinels;
-                option.sentinels = sentinelsConfig.remote;
-                option.name = sentinelsConfig.name;
-            } else {
-                var port = config.port || this.DEFAULT_PORT,
-                    host = config.host || this.DEFAULT_HOST;
-                option.port = port;
-                option.host = host;
-                // return new redis(
-                //     port,
-                //     host,
-                //     { no_ready_check: true, socket_keepalive: true }
-                // )
-            }
-            if (config.password) {
-                option.password = config.password;
-            }
-            return new redis(option)
+        //     if (isSentinels(config)) {
+        //         /** 哨兵模式 */
+        //         var sentinelsConfig = config.sentinels;
+        //         option.sentinels = sentinelsConfig.remote;
+        //         option.name = sentinelsConfig.name;
+        //     } else {
+        //         var port = config.port || this.DEFAULT_PORT,
+        //             host = config.host || this.DEFAULT_HOST;
+        //         option.port = port;
+        //         option.host = host;
+        //         // return new redis(
+        //         //     port,
+        //         //     host,
+        //         //     { no_ready_check: true, socket_keepalive: true }
+        //         // )
+        //     }
+        //     if (config.password) {
+        //         option.password = config.password;
+        //     }
+        //     return new redis(option)
       }
 
       function generateUUID() {
