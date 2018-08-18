@@ -94,6 +94,9 @@ var Engine = function(server, options) {
           if (config.password) {
               option.password = config.password;
           }
+          if (config.keyPrefix) {
+              option.keyPrefix = config.keyPrefix;
+          }
           return new redis(option)
     }
 
