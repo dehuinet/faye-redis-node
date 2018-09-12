@@ -256,7 +256,6 @@
 
           multi.lrange(key, 0, -1, function(error, jsonMessages) {
               if (!jsonMessages) return;
-              self.logger.info('empty queue jsonMessages =>', jsonMessages);
               var messages = jsonMessages.map(function(json) {
                   return JSON.parse(json)
               });
