@@ -276,25 +276,39 @@
       },
 
       emptyQueue: function(clientId) {
-          if (!this._server.hasConnection(clientId)) return;
-
-          var key = this._ns + '/clients/' + clientId + '/messages',
-              multi = this._redis.multi(),
-              self = this;
-        
-          multi.lrange(key, 0, -1);
-          var LRANGE_RESULT_IDX = 0;
-          multi.del(key);
-          multi.exec(function(result) {
-            var messages = result[LRANGE_RESULT_IDX][1];
-            if (!messages || Object.prototype.toString.call(messages) !== '[object Array]' || messages.length === 0) {
-                return;
-            }
-            messages = messages.map(function(json) {
+        if (!this._server.hasConnection(clientId)) return;
+        var key = this._ns + '/clients/' + clientId + '/messages',
+        self = this;
+        this._redis.lrange(key, 0, -1).then(function(result) {
+            var messages = result.map(function(json) {
                 return JSON.parse(json);
             })
-            self._server.deliver(clientId, messages);
-          });
+            console.log('empty queue ==>', messages);
+            console.log('================================================');
+            return self._server.deliver(clientId, messages);
+        })
+        .then(function() {
+            self._redis.del(key);
+        })
+        //   if (!this._server.hasConnection(clientId)) return;
+
+        //   var key = this._ns + '/clients/' + clientId + '/messages',
+        //       multi = this._redis.multi(),
+        //       self = this;
+        
+        //   multi.lrange(key, 0, -1);
+        //   var LRANGE_RESULT_IDX = 0;
+        //   multi.del(key);
+        //   multi.exec(function(result) {
+        //     var messages = result[LRANGE_RESULT_IDX][1];
+        //     if (!messages || Object.prototype.toString.call(messages) !== '[object Array]' || messages.length === 0) {
+        //         return;
+        //     }
+        //     messages = messages.map(function(json) {
+        //         return JSON.parse(json);
+        //     })
+        //     self._server.deliver(clientId, messages);
+        //   });
       },
 
       gc: function() {
