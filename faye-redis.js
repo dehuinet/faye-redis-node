@@ -59,9 +59,12 @@
       }
 
       function createGCTask(uniFileId) {
+          self.logger.info("It's time to create GC Task, Machine ID is",uniFileId);
           var expiryTime = gc * 2;
           var gcSchedule = function() {
             
+          self.logger.info("Successfully created GC Task");
+
               self._gc = setInterval(function() {
                   self._redis.setex(self._ns + '/locks/singleton', expiryTime, uniFileId);
                   // self._redis.expire(self._ns + '/locks/singleton', expiryTime);
@@ -91,26 +94,33 @@
       }
 
 
+      var checkGCTaskRunning =function(){
+        self._redis.get(self._ns + '/locks/singleton', function(error, oldUniFileId) { 
+            if(!oldUniFileId){
+                //Need create new GC Task
+                var fs = require("fs"),
+                uniFile = "/tmp/faye.uni";
+  
+            fs.readFile(uniFile, function(err, data) {
+                if (err) {
+                    var uniFileId = generateUUID();
+                    fs.writeFile(uniFile, uniFileId, function() {
+                        createGCTask(uniFileId);
+                    })
+                } else {
+                    createGCTask(data.toString());
+                }
+            });
+   
+            }
+        });
+      }
 
       //support cluster mode
       if (require("cluster").isMaster) {
-          var fs = require("fs"),
-              uniFile = "/tmp/faye.uni";
+        checkGCTaskRunning();
+        setInterval(checkGCTaskRunning,60 * 60 * 1000);
 
-          fs.readFile(uniFile, function(err, data) {
-              if (err) {
-                  var uniFileId = generateUUID();
-                  fs.writeFile(uniFile, uniFileId, function() {
-                      createGCTask(uniFileId);
-                  })
-              } else {
-                  createGCTask(data.toString());
-              }
-          });
-
-
-
-      }
   };
 
   Engine.create = function(server, options) {
